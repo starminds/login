@@ -1,6 +1,11 @@
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 
+const userDB = {
+  dbusername: "test",
+  dbpw: "123123123",
+};
+
 const Wrap = styled.div`
   height: 100vh;
   display: flex;
@@ -28,18 +33,6 @@ const LoginWrap = styled.div`
       margin-bottom: 15px;
       border-radius: 10px;
     }
-    button {
-      all: unset;
-      width: 100%;
-      height: 50px;
-      padding: 10px;
-      text-align: center;
-      background-color: orangered;
-      box-sizing: border-box;
-      color: white;
-      border-radius: 10px;
-      opacity: 0.5;
-    }
   }
 `;
 
@@ -55,16 +48,47 @@ const Title = styled.div`
   margin-bottom: 30px;
 `;
 
+const Button = styled.button`
+  all: unset;
+  width: 100%;
+  height: 50px;
+  padding: 10px;
+  text-align: center;
+  background-color: orangered;
+  box-sizing: border-box;
+  color: white;
+  border-radius: 10px;
+  opacity: ${(props) => props.opacity};
+  cursor: ${(props) => props.cursor};
+  transition: 0.5s;
+`;
+
 export const Login = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
+    getValues,
+    setError,
   } = useForm({
     mode: "onChange",
   });
 
   const onSubmit = () => {
+    const { username, password } = getValues();
+    const { dbusername, dbpw } = userDB;
+
+    if (username !== dbusername) {
+      setError("usernameResult", { message: "아이디가 틀렸습니다" });
+    }
+
+    if (password !== dbpw) {
+      setError("passwordResult", { message: "비밀번호가 틀렸습니다" });
+    }
+
+    if (username === dbusername && password === dbpw) {
+      alert("로그인 되었습니다!");
+    }
     // console.log("버튼눌렀음");
   };
 
@@ -86,7 +110,13 @@ export const Login = () => {
             type="text"
             placeholder="이메일이나 아이디를 입력 해 주세여"
           />
-          <ErrorMessage>{errors?.username?.message}</ErrorMessage>
+
+          {errors?.username?.message && (
+            <ErrorMessage>{errors?.username?.message}</ErrorMessage>
+          )}
+          {errors?.usernameResult?.message && (
+            <ErrorMessage>{errors?.usernameResult?.message}</ErrorMessage>
+          )}
           <input
             {...register("password", {
               required: "패스워드는 필수 입니다.",
@@ -94,13 +124,27 @@ export const Login = () => {
                 value: 3,
                 message: "패스워드는 3자리 이상 작성해주세요",
               },
-              pattern: "^(?=.*[A-Za-z])(?=.*d)[A-Za-zd]{8,}$",
+              pattern: {
+                value: /^(?=.*[A-Za-z])(?=.*d)[A-Za-zd]{8,}$/,
+                message:
+                  "패스워드는 8자리이상 문자,숫자조합으로 작성하셔야 됩니다 ",
+              },
             })}
             type="password"
             placeholder="패스워드"
           />
-          <ErrorMessage>{errors?.password?.message}</ErrorMessage>
-          <button>로그인</button>
+          {errors?.password?.message && (
+            <ErrorMessage>{errors?.password?.message}</ErrorMessage>
+          )}
+          {errors?.passwordResult?.message && (
+            <ErrorMessage>{errors?.passwordResult?.message}</ErrorMessage>
+          )}
+          <Button
+            opacity={isValid ? 1 : 0.5}
+            cursor={isValid ? "pointer" : "auto"}
+          >
+            로그인
+          </Button>
         </form>
       </LoginWrap>
     </Wrap>
